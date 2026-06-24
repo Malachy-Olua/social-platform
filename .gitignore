@@ -1,0 +1,10 @@
+# env
+social-docker/.env
+
+# binaries
+bin/
+tmp/
+
+# go
+*.exe
+*.out
