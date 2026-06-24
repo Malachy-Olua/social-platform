@@ -46,6 +46,7 @@ func (app *application) mount() http.Handler {
 	// initialize handlers
 	postHandler := handlers.NewPostHandler(app.store)
 	userHandler := handlers.NewUserHandler(app.store)
+	commentsHandler := handlers.NewCommnetsHandler(app.store)
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthcheckHandler)
@@ -61,6 +62,9 @@ func (app *application) mount() http.Handler {
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", userHandler.CreateUserHandler)
+		})
+		r.Route("/comments", func(r chi.Router) {
+			r.Post("/", commentsHandler.CreateCommentsHandler)
 		})
 	})
 

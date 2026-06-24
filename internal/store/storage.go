@@ -19,6 +19,7 @@ type Post struct {
 	Tags      []string  `json:"tags"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Comments  []Comment `json:"comments"`
 }
 
 type User struct {
@@ -28,6 +29,16 @@ type User struct {
 	Password  string    `json:"-"` // ← "-" not "_" to hide from JSON
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Comment struct {
+	ID        uuid.UUID `json:"id"`
+	PostID    uuid.UUID `json:"post_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	User      User
 }
 
 type Storage struct {
@@ -44,6 +55,7 @@ type Storage struct {
 	}
 
 	Comments interface {
+		Create(ctx context.Context, Comment *Comment) error
 		GetCommentsByPostId(ctx context.Context, postId string) ([]Comment, error)
 	}
 }

@@ -3,26 +3,21 @@ package store
 import (
 	"context"
 	"database/sql"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 type CommentsStore struct {
 	db *sql.DB
 }
 
-type Comment struct {
-	ID        uuid.UUID `json:"id"`
-	PostID    uuid.UUID `json:"post_id"`
-	UserID    uuid.UUID `json:"user_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	User      User
-}
+func (s *CommentsStore) Create(ctx context.Context, Comment *Comment) error {
+	q := `INSERT INTO comments (post_id, user_id, content) VALUES ($1, $2, $3) RETURNING id, user_id, content, post_id, created_at, updated_at;`
 
-func (s *CommentsStore) Create(ctx context.Context, comment *Comment) error {
+	err := s.db.QueryRowContext(ctx, q, Comment.PostID, Comment.UserID, Comment.Content).
+		Scan(&Comment.ID, &Comment.UserID, &Comment.Content, &Comment.PostID, &Comment.CreatedAt, &Comment.UpdatedAt)
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
