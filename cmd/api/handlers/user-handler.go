@@ -5,7 +5,10 @@ import (
 
 	"github.com/Malachy-Olua/social-platform/helpers"
 	"github.com/Malachy-Olua/social-platform/internal/store"
+	"github.com/go-chi/chi/v5"
+
 	// "github.com/google/uuid"
+	"strconv"
 )
 
 type UserHandler struct {
@@ -45,6 +48,58 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := helpers.WriteJSON(w, http.StatusCreated, user); err != nil {
+		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+func (h *UserHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	userId, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+
+	if err != nil {
+		helpers.WriteJSONError(w, http.StatusBadRequest, "no id provided")
+		return
+	}
+
+	ctx := r.Context()
+
+	user, err := h.Store.Users.GetUserById(ctx, userId)
+	if err != nil {
+		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := helpers.WriteJSON(w, http.StatusOK, user); err != nil {
+		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+}
+
+func (h *UserHandler) FollowUserHandler(w http.ResponseWriter, r *http.Request) {
+	userId, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	followeeId, err := strconv.ParseInt(chi.URLParam(r, "followeeId"), 10, 64)
+
+	if err != nil {
+		helpers.WriteJSONError(w, http.StatusBadRequest, "no id provided")
+		return
+	}
+
+	ctx := r.Context()
+
+	user, err := h.Store.Users.GetUserById(ctx, userId)
+	if err != nil {
+		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = h.Store.Followers.FollowUser(ctx, user.ID.String(), strconv.FormatInt(followeeId, 10))
+	if err != nil {
+		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err := helpers.WriteJSON(w, http.StatusOK, user); err != nil {
 		helpers.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
