@@ -50,19 +50,30 @@ func (app *application) mount() http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthcheckHandler)
+
+		// --->  POSTS GROUP ---->
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", postHandler.CreatePostHandler)
 			r.Get("/", postHandler.ListPostsHandler)
 
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", postHandler.GetPostHandler)
-				r.Put("/", postHandler.UpdatePostHandler)
+				r.Patch("/", postHandler.UpdatePostHandler)
 				r.Delete("/", postHandler.DeletePostHandler)
 			})
 		})
+
+		// --->  USERS GROUP ---->
 		r.Route("/users", func(r chi.Router) {
-			r.Post("/", userHandler.CreateUserHandler)
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", userHandler.GetUserHandler)
+				r.Put("/follow", userHandler.FollowUserHandler)
+				// r.Put("/unfollow", userHandler.UnfollowUserHandler)
+			})
+
 		})
+
+		// --->  COMMENTS GROUP ---->
 		r.Route("/comments", func(r chi.Router) {
 			r.Post("/", commentsHandler.CreateCommentsHandler)
 		})

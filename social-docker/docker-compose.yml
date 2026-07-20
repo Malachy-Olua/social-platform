@@ -1,5 +1,6 @@
 services:
   social-db:
+    container_name: social-db
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -11,6 +12,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   flyway:
+    container_name: flyway-social-platform
     image: flyway/flyway:10-alpine
     command: -url=jdbc:postgresql://social-db:5432/${DB_NAME} -user=${DB_USER} -password=${DB_PASSWORD} -connectRetries=10 migrate
     volumes:
@@ -21,6 +23,7 @@ services:
       - .env
 
   pgadmin:
+    container_name: pgadmin-social-platform
     image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
